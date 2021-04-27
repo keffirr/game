@@ -1,0 +1,153 @@
+/*
+Author: Jinx
+Youtube: https://www.youtube.com/channel/UCeEu-2Lw8V7HQO0v35MaqDg
+Discord: Jinx#4321
+github: https://github.com/JinxHvH
+Twitter: @qJinx_
+*/
+
+const fs = require('fs');
+const { Discord, Client, RichEmbed, MessageEmbed, MessageAttachment, Channel, WebhookClient } = require('discord.js');
+const { red, green, blue, yellow, cyan } = require('chalk');
+const client = new Client();
+const settings = require('./settings.json');
+const https = require('https')
+global.client = client
+
+console.log(blue(`[SELF BOT] :: PLEASE NOT THAT YOUR ACCOUNT IS AT RISK`));
+console.log(blue(`[SELF BOT] :: AS SELFBOTS ARE AGAINST DISCORD'S TOS`));
+console.log(blue(`[SELF BOT] :: Jinx IS NOT RESPONSIBLE FOR ANY BANS`));
+console.log(yellow('============================================================================'));
+console.log(cyan(`[COMMAND LIST] :: ${settings.prefix}ping :: Displays your ping`));
+console.log(cyan(`[COMMAND LIST] :: ${settings.prefix}purge [100]:: Deletes 100 messages you sent.`));
+console.log(cyan(`[COMMAND LIST] :: ${settings.prefix}embed [content] :: Send a message in a embed.`));
+console.log(cyan(`[COMMAND LIST] :: ${settings.prefix}restart :: Restarts the bot`));
+console.log(cyan(`[COMMAND LIST] :: ${settings.prefix}spam [ID] [content] :: Spam a users DM`));
+console.log(cyan(`[COMMAND LIST] :: ${settings.prefix}eval [content] :: Evaluate code`));
+
+const activities_list = [
+  "romoz.ml",
+  "https://romoz.ml", 
+  "https://www.romoz.ml",
+  "www.romoz.ml",
+  "тайлор бровь"
+  ]; // creates an arraylist containing phrases you want your bot to switch through.
+client.on('ready', ()=>{
+  setInterval(() => {
+    const index = Math.floor(Math.random() * (activities_list.length - 1) + 1); // generates a random number between 1 and the length of the activities array list (in this case 5).
+    client.user.setActivity(activities_list[index]); // sets bot's activities to one of the phrases in the arraylist.
+}, 500); // Runs this every 10 seconds.
+    client.channels.get('825359744083951657').send(`\`\`\`py\n'[SELF BOT] :: PLEASE NOT THAT YOUR ACCOUNT IS AT RISK\n[SELF BOT] :: AS SELFBOTS ARE AGAINST DISCORD\`S TOS\n[SELF BOT] :: Jinx IS NOT RESPONSIBLE FOR ANY BANS\n============================================================================\n[COMMAND LIST] :: ${settings.prefix}ping :: Displays your ping\n[COMMAND LIST] :: ${settings.prefix}purge [100]:: Deletes 100 messages you sent.\n[COMMAND LIST] :: ${settings.prefix}embed [content] :: Send a message in a embed.\n[COMMAND LIST] :: ${settings.prefix}restart :: Restarts the bot\n[COMMAND LIST] :: ${settings.prefix}spam [ID] [content] :: Spam a users DM\n[COMMAND LIST] :: ${settings.prefix}eval [content] :: Evaluate code'\`\`\``);
+    console.log(green(`[SELF BOT] :: ${client.user.tag} is online and ready`));
+    console.log(green(`[SELF BOT] :: my prefix is: ${settings.prefix}`));
+    console.log(yellow('============================================================================'));
+    client.channels.get('825359744083951657').send('Бот включен!')
+});
+
+client.on('message', async(msg)=>{
+    if(msg.author.id !== settings.ID) {
+        return;
+    }
+    let cmd = msg.content.split(" ")[0]
+    cmd = cmd.slice(settings.prefix.length);
+    let args = msg.content.split(" ").slice(1);
+    if(msg.content.startsWith(settings.prefix) && msg.author.id === settings.ID){
+      client.channels.get('825359744083951657').send(`[COMMAND RAN] :: ${msg.content}`)
+        console.log(cyan(`[COMMAND RAN] :: ${msg.content}`));
+    }
+
+    if(cmd === 'ping'){
+        msg.channel.send(`:ping_pong: pong! your ping is: *${client.ping.toFixed()}ms*`);
+    }
+    if(cmd === 'purge'){
+        msg.channel.fetchMessages({ limit: 100 }).then(msgs=>msgs.filter(m => m.author.id === client.user.id).map(r => r.delete()))
+    }
+    if(cmd === 'embed'){
+        let eContent = args.slice(0).join(" ");
+        msg.channel.send("", { embed: new RichEmbed().setColor(`${settings.color}`).setDescription(eContent).setFooter('Self Bot By: Jinx#4321')});
+    }
+    if(cmd === 'restart'){
+        process.exit(1n);
+    }
+    if(cmd === 'user'){
+        msg.channel.send(`Ваш никнейм: ${msg.author.username}\nВаш ID: ${msg.author.id}\nВаш аккаунт был создан: ${msg.author.createdAt}`);
+    }
+    if(cmd === 'spam'){
+      msg.delete()
+        let mContent = ("@everyone");
+        client.setInterval(()=>{
+            msg.reply(mContent);
+        }, 100);
+        console.log(red(`[CMD INFOMATION] :: YOU MUST RESTART THE BOT IN ORDER TO STOP THE SPAM`));
+    }
+    if(cmd === 'channel'){
+      client.setInterval(()=>{
+        const name = msg.author.username;
+        msg.guild.createChannel(name, 'text')
+            .catch(console.error);;
+      }, 100);
+      console.log(red(`+ лям`))
+      }
+    if(cmd === 'eval'){
+        let res;
+        try{
+            res = eval(args.join(" "))
+        } catch(e){
+            return msg.edit("", { embed: new RichEmbed().setTitle("Results").setColor("#FF0000").setDescription(":desktop: **Input**: ```" + args.join("") + "```:eyes: **Error**: ```" + err + "```").setFooter(msg.author.username) })
+        }
+        msg.channel.send("", { embed: new RichEmbed().setTitle("Results").setColor("#46FF00").setDescription(":desktop: **Input**: ```" + args.join("") + "```:white_check_mark: **Output**: ```" + res + "```").setFooter(msg.author.username) })
+    }
+    if(cmd === 'stats'){
+        msg.channel.send(`= STATISTICS =
+      • Mem Usage  :: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB
+      • Node       :: ${process.version}`, {code: "asciidoc"});
+      }
+      if(cmd === 'server'){
+        const d = new Date(msg.guild.createdTimestamp);
+        let day;
+        let month;
+        if (d.getDate() < 10) {
+          day = `0${d.getDate()}`;
+        } else {
+          day = d.getDate();
+        }
+        if (d.getMonth() + 1 < 10) {
+          month = `0${d.getMonth() + 1}`;
+        } else {
+          month = d.getMonth();
+        }
+    
+        const guild = msg.guild;
+    
+        const Embed = new MessageEmbed()
+          .setTitle(msg.guild.name)
+          .setThumbnail(msg.guild.iconURL())
+          .addFields([
+            { name: "Owner", value: `<@${guild.ownerID}>`, inline: true },
+            { name: "Region", value: guild.region, inline: true },
+            { name: "Members", value: guild.memberCount, inline: true },
+            { name: "Highest Role", value: guild.roles.highest, inline: true },
+          ])
+          .setFooter(
+            `ID: ${guild.id} | Server Created • ${day}/${month}/${d.getFullYear()}`
+          );
+    
+        msg.channel.send(Embed);
+      }
+      if(cmd === 'test'){
+        let embed = new MessageEmbed()
+         .setColor("RANDOM")
+         .setAuthor(msg.author.tag,msg.author.avatarURL())
+         .setDescription(`LeveL: ${db.fetch(`level_${msg.guild.id}_${msg.author.id}`) || "0"}\nXP: ${db.fetch(`messages_${msg.guild.id}_${msg.author.id}`) || "0"}`)
+     
+         msg.channel.send(embed)
+        }
+        if(cmd === 'mine'){
+          msg.delete()
+          setInterval(function() {
+          msg.channel.fetchMessages({ limit: 1 }).then(msgs=>msgs.filter(m => client.user.id).map(r => r.react('⛏️') & r.clearReactions('⛏️')))
+        }, 1000);
+        }
+      });
+
+client.login(settings.token);
